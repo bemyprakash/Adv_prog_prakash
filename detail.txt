@@ -1,0 +1,403 @@
+
+ADVANCED PROGRAMMING COURSE
+Project Documentation
+FOOD DELIVERY SYSTEM
+with Customer Support Module
+Course	Advanced Programming
+Document Type	Full Project Plan & Design
+Version	2.0 (Customer Support Edition)
+Total Pages	10
+Methodology	Object-Oriented Programming
+ 
+Table of Contents
+Section	Title	Page
+1	Project Overview & Objectives	3
+2	System Architecture & Actors	3
+3	OOP Concepts Applied	4
+4	Class Design & UML Class Diagrams	4–5
+5	Use Case Diagram & Use Case Descriptions	6
+6	System Flow Diagrams	7
+7	Sequence Diagrams (Textual)	8
+8	Data Relationships & ER Overview	8
+9	Implementation Plan & Technologies	9
+10	Testing Strategy & Conclusion	10
+
+1. Project Overview & Objectives
+The Food Delivery System is a comprehensive, object-oriented software application designed to simulate a real-world platform similar to Zomato, Swiggy, or UberEats. The system manages the entire lifecycle of a food order — from browsing menus and placing an order, to live delivery tracking and post-order customer support.
+
+1.1 Project Objectives
+•	Design a scalable, modular system using OOP principles (Inheritance, Encapsulation, Abstraction, Polymorphism).
+•	Implement role-based access for five distinct actors: Customer, Restaurant Owner, Delivery Agent, Customer Support, and Admin.
+•	Include a complete Customer Support ticketing module to handle real-world exceptions such as failed payments, wrong orders, and profile issues.
+•	Provide full design documentation including UML class diagrams, use case diagrams, flow diagrams, and sequence diagrams.
+•	Produce production-grade code architecture suitable for extension into a fully functional application.
+
+1.2 System Scope
+Feature Area	Included In Scope	Notes
+User Registration & Login	Yes	All 5 actor types
+Menu Browse & Order Placement	Yes	With coupon support
+Real-Time Order Tracking	Yes	Via DeliveryAgent location updates
+Payment Processing	Yes	Linked to SupportTicket on failure
+Customer Support Ticketing	Yes	Core new feature
+Ratings & Reviews	Yes	Post-delivery
+Emergency Delivery Updates	Yes	DeliveryAgent safety feature
+Admin Dashboard	Yes	System management
+Push Notifications	Partial	Out of detailed scope
+ 
+2. System Architecture & Actors
+2.1 System Actors
+The system defines five distinct actor roles. Each actor interacts with the system through a well-defined interface, and four of the five actors share a common base class, demonstrating the inheritance design pattern.
+
+Actor	Role Description	Key Responsibilities
+Customer	End-user who orders food	Browse menu, place/cancel orders, track delivery, rate, raise complaints
+Restaurant Owner	Business owner who receives orders	Update menu, accept/reject orders, mark preparation status
+Delivery Agent	Field personnel who delivers orders	Accept delivery, update GPS location, send emergency alerts
+Customer Support	Internal support representative	Handle complaints, resolve payments, escalate tickets, update profiles
+Admin	System administrator	Manage all users, view reports, configure system settings
+
+2.2 High-Level Architecture
+The system follows a layered architecture: Presentation Layer (UI) → Business Logic Layer (Classes & OOP) → Data Layer (Database / Storage). The core of the business logic layer is the inheritance hierarchy rooted in the UserAccount base class.
+
+PRESENTATION LAYER:  Customer App  |  Restaurant Portal  |  Agent App  |  Support Dashboard  |  Admin Panel
+         |                    |                     |                  |                      |             
+BUSINESS LOGIC:  UserAccount (Base)  →  Customer / DeliveryAgent / RestaurantOwner / CustomerSupport
+                 Order  →  Payment  →  SupportTicket  →  Rating  →  Notification             
+DATA LAYER:      MySQL / PostgreSQL  —  ORM / Repository Pattern                             
+
+3. OOP Concepts Applied
+OOP Pillar	How It Is Applied In This Project	Example
+Inheritance	Customer, DeliveryAgent, RestaurantOwner, CustomerSupport all extend UserAccount, inheriting userId, name, phone, email, login() and logout().	class Customer extends UserAccount
+Encapsulation	All class attributes are private/protected. Access is via getter/setter methods. SupportTicket hides its internal state (Open → In Progress → Resolved) from external classes.	ticket.updateStatus("Resolved")
+Abstraction	The Customer does not know HOW a complaint is processed internally. They only call raiseComplaint(); the backend CustomerSupport module handles logic invisibly.	customer.raiseComplaint("Payment failed")
+Polymorphism	All user types extend UserAccount. A reference of type UserAccount can point to any derived object. Each subclass overrides or adds its own behaviour (e.g., different dashboard actions).	UserAccount u = new Customer()
+ 
+4. UML Class Diagrams
+4.1 Base Class: UserAccount
+All user-facing actors inherit from UserAccount. This enforces a consistent identity structure across the system.
+
+«class» UserAccount  [Base Class]
+- # userId : String
+- # name : String
+- # phone : String
+- # email : String
+- # password : String
+- # createdAt : DateTime
+Methods
++ + login() : boolean
++ + logout() : void
++ + updateProfile(data) : void
++ + getNotifications() : List<Notification>
+
+4.2 Derived Classes (Inheritance Hierarchy)
+
+«class» Customer  [extends UserAccount]
+- - cartItems : List<Item>
+- - orderHistory : List<Order>
+- - walletBalance : double
+- - loyaltyPoints : int
+Methods
++ + placeOrder(cart) : Order
++ + cancelOrder(orderId) : boolean
++ + trackOrder(orderId) : Location
++ + applyCoupon(code) : double
++ + giveRating(orderId, stars) : void
++ + raiseComplaint(desc) : SupportTicket
+	«class» DeliveryAgent  [extends UserAccount]
+- - agentId : String
+- - vehicleType : String
+- - currentLocation : GPS
+- - isAvailable : boolean
+- - assignedOrders : List<Order>
+Methods
++ + acceptDelivery(order) : void
++ + updateLocation(gps) : void
++ + markDelivered(orderId) : void
++ + sendEmergencyUpdate(msg) : void
+
+
+«class» RestaurantOwner  [extends UserAccount]
+- - restaurantId : String
+- - restaurantName : String
+- - menuItems : List<MenuItem>
+- - openingHours : String
+Methods
++ + updateMenu(item) : void
++ + acceptOrder(orderId) : void
++ + rejectOrder(orderId, reason) : void
++ + prepareOrder(orderId) : void
++ + viewOrders() : List<Order>
+	«class» CustomerSupport  [extends UserAccount]
+- - supportId : String
+- - assignedTickets : List<SupportTicket>
+- - availabilityStatus : String
+- - department : String
+Methods
++ + handleComplaint(ticket) : void
++ + resolvePaymentIssue(ticketId) : void
++ + updateUserProfile(userId) : void
++ + trackIssueStatus(ticketId) : String
++ + escalateIssue(ticketId) : void
+
+ 
+4.3 Supporting Classes
+
+«class» Order
+- - orderId : String
+- - customerId : String
+- - restaurantId : String
+- - agentId : String
+- - items : List<MenuItem>
+- - status : OrderStatus
+- - totalAmount : double
+- - placedAt : DateTime
+Methods
++ + createOrder() : Order
++ + updateStatus(s) : void
++ + calculateTotal() : double
++ + assignAgent(agentId) : void
+	«class» SupportTicket
+- - ticketId : String
+- - customerId : String
+- - orderId : String
+- - issueType : IssueType
+- - description : String
+- - status : TicketStatus
+- - createdAt : DateTime
+Methods
++ + createTicket() : SupportTicket
++ + updateStatus(s : TicketStatus) : void
++ + assignAgent(supportId) : void
++ + getResolutionTime() : long
+
+
+«class» Payment
+- - paymentId : String
+- - orderId : String
+- - amount : double
+- - method : PaymentMethod
+- - status : PaymentStatus
+- - transactionRef : String
+Methods
++ + processPayment() : boolean
++ + refund(amount) : boolean
++ + getStatus() : PaymentStatus
++ + generateReceipt() : String
+	«class» MenuItem
+- - itemId : String
+- - name : String
+- - description : String
+- - price : double
+- - category : String
+- - isAvailable : boolean
+- - restaurantId : String
+Methods
++ + updatePrice(p) : void
++ + toggleAvailability() : void
++ + getDetails() : String
+
+
+4.4 Class Relationship Summary
+From Class	Relationship	To Class	Cardinality
+Customer	places →	Order	1 Customer → Many Orders
+Customer	raises →	SupportTicket	1 Customer → Many Tickets
+Order	generates →	Payment	1 Order → 1 Payment
+Order	contains →	MenuItem	1 Order → Many MenuItems
+Order	assigned to →	DeliveryAgent	1 Order → 1 Agent
+SupportTicket	handled by →	CustomerSupport	Many Tickets → 1 Support Agent
+Payment (failed) →	linked to →	SupportTicket	1 Failed Payment → 1 Ticket
+RestaurantOwner	manages →	MenuItem	1 Restaurant → Many MenuItems
+ 
+5. Use Case Descriptions
+5.1 Use Case Diagram (Textual Notation)
+SYSTEM: Food Delivery Platform
+
+Actors:  [Customer]  [RestaurantOwner]  [DeliveryAgent]  [CustomerSupport]  [Admin]
+
+[Customer] ─────── UC01: Register / Login
+[Customer] ─────── UC02: Browse Menu & Search
+[Customer] ─────── UC03: Place Order (includes Apply Coupon)
+[Customer] ─────── UC04: Track Order (includes View Agent Location)
+[Customer] ─────── UC05: Make Payment (extends UC03)
+[Customer] ─────── UC06: Cancel Order
+[Customer] ─────── UC07: Rate & Review
+[Customer] ─────── UC08: Raise Support Ticket  ◄── KEY NEW USE CASE
+[RestaurantOwner] ─ UC09: Manage Menu
+[RestaurantOwner] ─ UC10: Accept / Reject Order
+[DeliveryAgent] ─── UC11: Accept & Deliver Order
+[DeliveryAgent] ─── UC12: Update Location
+[DeliveryAgent] ─── UC13: Send Emergency Update
+[CustomerSupport] ─ UC14: Handle Complaint Ticket  ◄── KEY NEW USE CASE
+[CustomerSupport] ─ UC15: Resolve Payment Issue
+[CustomerSupport] ─ UC16: Escalate Ticket to Admin
+[Admin] ──────────  UC17: Manage Users & System Reports
+
+5.2 Detailed Use Case: Place Order (UC03)
+Use Case ID	UC03
+Use Case Name	Place Order
+Primary Actor	Customer
+Description	Customer selects items from a restaurant menu, applies an optional coupon code, and confirms an order that is sent to the restaurant.
+Precondition	Customer is logged in. Restaurant menu is loaded. Customer has at least one item in cart.
+Postcondition	Order object is created with status PENDING. Payment is initiated. Restaurant is notified.
+Main Flow	1. Customer browses menu and adds items to cart.  2. Customer optionally enters coupon code; system validates and applies discount.  3. Customer selects delivery address and payment method.  4. Customer taps 'Place Order'; system creates Order object.  5. Payment is processed (see UC05).  6. Restaurant receives notification. Order status changes to CONFIRMED.
+
+5.3 Detailed Use Case: Raise Support Ticket (UC08)
+Use Case ID	UC08
+Use Case Name	Raise Support Ticket
+Primary Actor	Customer
+Description	Customer experiences an issue (e.g., payment failure, wrong item, late delivery) and creates a support ticket through the app.
+Precondition	Customer is logged in. Issue relates to an existing order or payment transaction.
+Postcondition	SupportTicket object is created with status OPEN. A CustomerSupport agent is notified and assigned.
+Main Flow	1. Customer navigates to 'Help & Support' section.  2. Customer selects issue type: Payment / Order / Profile / Other.  3. Customer enters description and links relevant orderId.  4. System creates SupportTicket with unique ticketId and status OPEN.  5. System notifies available CustomerSupport agent.  6. Agent is assigned; ticket status changes to IN_PROGRESS.  7. Agent resolves issue; status changes to RESOLVED. Customer is notified.
+ 
+6. System Flow Diagrams
+6.1 Order Placement Flow
+1	Customer logs in via app and browses restaurant listings.
+2	Customer selects a restaurant → views menu items → adds items to cart.
+3	Customer applies coupon code (optional). System validates code and applies discount.
+4	Customer reviews cart, selects delivery address and payment method.
+5	Customer confirms order. System creates Order object with status = PENDING.
+6	Payment is processed. On success → status = CONFIRMED. On failure → SupportTicket raised automatically.
+7	Restaurant is notified. Owner accepts order → status = ACCEPTED → PREPARING.
+8	System assigns nearest available DeliveryAgent to the order.
+9	Agent picks up order. Status = OUT_FOR_DELIVERY. Customer can track live location.
+10	Agent delivers order. Status = DELIVERED. Customer prompted to rate.
+
+6.2 Customer Support Flow (New Module)
+1	Customer experiences an issue (payment failed / wrong order / item missing / profile error).
+2	Customer opens Help & Support in app. Selects issue type from dropdown.
+3	Customer fills description form and links orderId or transactionId.
+4	System creates SupportTicket object: ticketId generated, status = OPEN, timestamp recorded.
+5	System auto-assigns ticket to available CustomerSupport agent (by availabilityStatus).
+6	Agent opens ticket. Reviews order/payment data. Status updated to IN_PROGRESS.
+7	Agent takes action: issues refund via Payment.refund(), corrects profile, or contacts restaurant.
+8	If issue is complex, agent calls escalateIssue() → Admin is notified.
+9	Issue resolved. Agent sets status = RESOLVED. Customer receives in-app notification.
+10	Customer confirmation requested. If unsatisfied, ticket can be reopened.
+
+6.3 Delivery Agent Emergency Flow
+1	DeliveryAgent is on route. Experiences emergency (accident, road block, vehicle breakdown).
+2	Agent opens app and taps Emergency Update button.
+3	Agent calls sendEmergencyUpdate(message, location).
+4	System notifies Admin and CustomerSupport immediately.
+5	System sends automated message to Customer explaining delay.
+6	Admin re-assigns a new DeliveryAgent to the pending order.
+7	New agent accepts delivery. Customer is notified of reassignment.
+ 
+7. Sequence Diagrams (Textual)
+7.1 Order Placement Sequence
+Customer          App UI            OrderService         PaymentService       Restaurant
+    |                |                    |                    |                    |   
+    |──login()──────►|                    |                    |                    |   
+    |──addToCart()──►|                    |                    |                    |   
+    |──placeOrder()─►|──createOrder()────►|                    |                    |   
+    |                |                    |──processPayment()─►|                    |   
+    |                |                    |◄── paymentOK ──────|                    |   
+    |                |                    |──notifyRestaurant()────────────────────►|   
+    |◄─ orderConfirmed ──────────────────|                    |                    |   
+
+7.2 Support Ticket Resolution Sequence
+Customer        App UI         SupportService      CustomerSupport       PaymentService
+    |               |                 |                    |                    |       
+    |─raiseComplaint►|                |                    |                    |       
+    |               |─createTicket()─►|                    |                    |       
+    |               |                 |─assignAgent()─────►|                    |       
+    |               |                 |                    |─handleComplaint()  |       
+    |               |                 |                    |─refund()──────────►|       
+    |               |                 |                    |◄── refundOK ───────|       
+    |               |                 |─updateStatus(RESOLVED)─────────────────|       
+    |◄─ notifyResolved ──────────────|                    |                    |       
+
+8. Data Relationships & ER Overview
+8.1 Key Entity Relationships
+Entity	Primary Key	Foreign Keys	Key Attributes
+UserAccount	userId (PK)	—	name, email, phone, password, role
+Customer	userId (PK, FK → UserAccount)	—	walletBalance, loyaltyPoints
+Order	orderId (PK)	customerId (FK), restaurantId (FK), agentId (FK)	status, totalAmount, placedAt
+Payment	paymentId (PK)	orderId (FK)	amount, method, status, transactionRef
+SupportTicket	ticketId (PK)	customerId (FK), orderId (FK), supportId (FK)	issueType, status, description
+MenuItem	itemId (PK)	restaurantId (FK)	name, price, category, isAvailable
+Rating	ratingId (PK)	orderId (FK), customerId (FK)	stars, comment, createdAt
+ 
+9. Implementation Plan & Technologies
+9.1 Recommended Technology Stack
+Layer	Technology	Purpose
+Language	Java 17 / Python 3.10+	Core OOP implementation
+Backend Framework	Spring Boot / Django REST	API development & routing
+Database	MySQL / PostgreSQL	Relational data storage (reflects ER model)
+ORM	Hibernate (Java) / Django ORM	Maps classes to DB tables
+Authentication	JWT Tokens	Secure role-based login for all 5 actors
+Frontend (Optional)	React Native / Flutter	Cross-platform mobile UI
+Testing	JUnit 5 / PyTest	Unit & integration testing
+Version Control	Git / GitHub	Source code management
+
+9.2 Development Phases
+Phase	Sprint	Deliverables	Duration
+Phase 1 — Foundation	Sprint 1	UserAccount base class + all 4 derived classes, login/logout	Week 1–2
+Phase 2 — Core Orders	Sprint 2	Order class, MenuItem, cart logic, place/cancel order	Week 3–4
+Phase 3 — Delivery	Sprint 3	DeliveryAgent live location, order assignment, emergency updates	Week 5
+Phase 4 — Payments	Sprint 4	Payment class, coupon system, refund logic	Week 6
+Phase 5 — Support Module	Sprint 5	SupportTicket class, CustomerSupport class, full ticket flow	Week 7–8
+Phase 6 — Testing	Sprint 6	Unit tests for all classes, integration tests, bug fixing	Week 9
+Phase 7 — Docs & Demo	Sprint 7	Final documentation, UML diagrams, viva preparation	Week 10
+
+9.3 Java Class Skeleton (CustomerSupport)
+public class CustomerSupport extends UserAccount {
+    private String supportId;
+    private List<SupportTicket> assignedTickets;
+    private String availabilityStatus;  // 'AVAILABLE', 'BUSY', 'OFFLINE'
+
+    public void handleComplaint(SupportTicket ticket) {
+        ticket.updateStatus(TicketStatus.IN_PROGRESS);
+        // Review linked Order and Payment
+    }
+
+    public void resolvePaymentIssue(String ticketId) {
+        SupportTicket t = getTicket(ticketId);
+        Payment p = PaymentService.getByOrderId(t.getOrderId());
+        if (p.getStatus() == PaymentStatus.FAILED) {
+            p.refund(p.getAmount());
+            t.updateStatus(TicketStatus.RESOLVED);
+        }
+    }
+
+    public void escalateIssue(String ticketId) {
+        AdminService.notifyAdmin(ticketId);  // escalate to Admin
+    }
+}
+ 
+10. Testing Strategy & Conclusion
+10.1 Testing Strategy
+Test Type	What Is Tested	Tools
+Unit Testing	Individual class methods: placeOrder(), createTicket(), processPayment(), escalateIssue()	JUnit 5 / PyTest
+Integration Testing	Order → Payment → SupportTicket chain; Agent assignment flow	Spring Test / Django TestCase
+Boundary Testing	Empty cart order, duplicate coupon, zero-amount refund, ticket with no linked order	Manual / JUnit Parameterized
+Role-based Access Testing	Customer cannot access Admin dashboard; Support cannot place orders	Mock Authentication + JUnit
+Regression Testing	Ensure new CustomerSupport module doesn't break existing order flow	CI pipeline (GitHub Actions)
+
+10.2 Sample Test Cases
+TC#	Test Case	Input	Expected Output
+TC01	Place order with valid cart	3 menu items, valid payment	Order created, status = CONFIRMED
+TC02	Apply invalid coupon	Coupon code = 'EXPIRED99'	Error: Coupon not valid or expired
+TC03	Raise complaint on failed payment	orderId = 'ORD-204', issueType = PAYMENT	SupportTicket created, status = OPEN
+TC04	CustomerSupport resolves ticket	ticketId = 'TKT-091'	Payment refunded, ticket status = RESOLVED
+TC05	Agent sends emergency update	message = 'Accident on Route 7'	Admin + Support notified, order reassigned
+TC06	Customer rates delivery	orderId = 'ORD-180', stars = 5	Rating saved, restaurant score updated
+
+10.3 Conclusion
+The Food Delivery System project demonstrates a thorough application of advanced programming principles within a realistic, commercially-relevant domain. By using a proper inheritance hierarchy rooted at UserAccount, all four user-facing roles (Customer, DeliveryAgent, RestaurantOwner, CustomerSupport) share a consistent base, enabling polymorphic behaviour and clean code reuse.
+
+The addition of the CustomerSupport module elevates the system beyond a basic delivery app into a fully operational platform. The SupportTicket class introduces a ticket-based workflow modelled after real-world systems such as Zomato Support and Freshdesk, demonstrating scalable and modular issue resolution with clearly defined state transitions (OPEN → IN_PROGRESS → RESOLVED).
+
+The system is designed for extensibility: future modules such as real-time chat between Customer and Support, AI-based ticket triage, a Refund class, and a Notification service can all be added without restructuring the existing architecture.
+
+KEY OOP DESIGN DECISIONS SUMMARY
+
+  Inheritance:     UserAccount → Customer, DeliveryAgent, RestaurantOwner, CustomerSupport
+  Encapsulation:   SupportTicket hides status transitions; Payment hides transaction logic
+  Abstraction:     Customer calls raiseComplaint() without knowing backend ticket processing
+  Polymorphism:    Any UserAccount reference can hold Customer, Agent, or Support object
+
+  'The ticket-based support system mirrors industry-standard platforms, ensuring scalability,
+   modularity, and professional-grade exception handling in a real-world OOP application.'
+
+— End of Project Document —
