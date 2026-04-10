@@ -28,3 +28,28 @@ class UserAccount(Base):
     restaurant_owner = relationship("RestaurantOwner", uselist=False, back_populates="user")
     delivery_agent = relationship("DeliveryAgent", uselist=False, back_populates="user")
     customer_support = relationship("CustomerSupport", uselist=False, back_populates="user")
+
+
+class Customer(Base):
+    __tablename__ = "customers"
+    user_id = Column(String, ForeignKey("user_accounts.user_id"), primary_key=True)
+    wallet_balance = Column(Float, default=0.0)
+    loyalty_points = Column(Integer, default=0)
+    user = relationship("UserAccount", back_populates="customer")
+    orders = relationship("Order", back_populates="customer")
+    tickets = relationship("SupportTicket", back_populates="customer")
+
+class RestaurantOwner(Base):
+    __tablename__ = "restaurant_owners"
+    user_id = Column(String, ForeignKey("user_accounts.user_id"), primary_key=True)
+    restaurant_id = Column(String, unique=True, nullable=False)
+    restaurant_name = Column(String, nullable=False)
+    opening_hours = Column(String)
+    is_verified = Column(Boolean, default=False)
+    user = relationship("UserAccount", back_populates="restaurant_owner")
+    menu_items = relationship("MenuItem", back_populates="restaurant_owner")
+    orders = relationship("Order", back_populates="restaurant_owner")
+
+    def verify_restaurant(self):
+        """OOP method to transition a restaurant to verified state"""
+        self.is_verified = True
