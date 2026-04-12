@@ -134,4 +134,4 @@ class Payment(Base):
     method = Column(String)
     status = Column(Enum(PaymentStatus), default=PaymentStatus.pending)
     transaction_ref = Column(String)
-    order = rel
+    order = relationship("Order", back_populates="payment")
