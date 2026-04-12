@@ -82,3 +82,20 @@ class OrderStatus(str, enum.Enum):
     out_for_delivery = "OUT_FOR_DELIVERY"
     delivered = "DELIVERED"
     cancelled = "CANCELLED"
+
+class Order(Base):
+    __tablename__ = "orders"
+    order_id = Column(String, primary_key=True, index=True)
+    customer_id = Column(String, ForeignKey("customers.user_id"))
+    restaurant_id = Column(String, ForeignKey("restaurant_owners.restaurant_id"))
+    agent_id = Column(String, ForeignKey("delivery_agents.agent_id"), nullable=True)
+    status = Column(Enum(OrderStatus), default=OrderStatus.pending)
+    total_amount = Column(Float, default=0.0)
+    special_instructions = Column(String, nullable=True)
+    delivery_address = Column(String, nullable=False, default="Default Address")
+    placed_at = Column(DateTime, default=datetime.datetime.utcnow)
+    customer = relationship("Customer", back_populates="orders")
+    restaurant_owner = relationship("RestaurantOwner", back_populates="orders")
+    delivery_agent = relationship("DeliveryAgent", back_populates="orders")
+    items = relationship("OrderMenuItem", back_populates="order")
+    payment = relationship("Payment", uselist=False, back_populates="order")
