@@ -99,3 +99,23 @@ class Order(Base):
     delivery_agent = relationship("DeliveryAgent", back_populates="orders")
     items = relationship("OrderMenuItem", back_populates="order")
     payment = relationship("Payment", uselist=False, back_populates="order")
+
+class MenuItem(Base):
+    __tablename__ = "menu_items"
+    item_id = Column(String, primary_key=True, index=True)
+    restaurant_id = Column(String, ForeignKey("restaurant_owners.restaurant_id"))
+    name = Column(String, nullable=False)
+    description = Column(String)
+    price = Column(Float, nullable=False)
+    category = Column(String)
+    is_available = Column(Boolean, default=True)
+    restaurant_owner = relationship("RestaurantOwner", back_populates="menu_items")
+    orders = relationship("OrderMenuItem", back_populates="menu_item")
+
+class OrderMenuItem(Base):
+    __tablename__ = "order_menu_items"
+    order_id = Column(String, ForeignKey("orders.order_id"), primary_key=True)
+    item_id = Column(String, ForeignKey("menu_items.item_id"), primary_key=True)
+    quantity = Column(Integer, default=1)
+    order = relationship("Order", back_populates="items")
+    menu_item = relationship("MenuItem", back_populates="orders")
