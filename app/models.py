@@ -119,3 +119,19 @@ class OrderMenuItem(Base):
     quantity = Column(Integer, default=1)
     order = relationship("Order", back_populates="items")
     menu_item = relationship("MenuItem", back_populates="orders")
+
+class PaymentStatus(str, enum.Enum):
+    pending = "PENDING"
+    success = "SUCCESS"
+    failed = "FAILED"
+    refunded = "REFUNDED"
+
+class Payment(Base):
+    __tablename__ = "payments"
+    payment_id = Column(String, primary_key=True, index=True)
+    order_id = Column(String, ForeignKey("orders.order_id"))
+    amount = Column(Float, nullable=False)
+    method = Column(String)
+    status = Column(Enum(PaymentStatus), default=PaymentStatus.pending)
+    transaction_ref = Column(String)
+    order = rel
