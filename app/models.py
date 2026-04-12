@@ -187,3 +187,20 @@ class Notification(Base):
     message = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     is_read = Column(Boolean, default=False)
+
+class ChatContext(str, enum.Enum):
+    order = "ORDER"
+    ticket = "TICKET"
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    msg_id = Column(String, primary_key=True, index=True)
+    sender_id = Column(String, ForeignKey("user_accounts.user_id"))
+    receiver_id = Column(String, ForeignKey("user_accounts.user_id"), nullable=True)
+    context_type = Column(Enum(ChatContext))
+    context_id = Column(String)
+    content = Column(String)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    sender = relationship("UserAccount", foreign_keys=[sender_id])
+
