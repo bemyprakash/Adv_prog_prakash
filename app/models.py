@@ -53,3 +53,32 @@ class RestaurantOwner(Base):
     def verify_restaurant(self):
         """OOP method to transition a restaurant to verified state"""
         self.is_verified = True
+
+
+class DeliveryAgent(Base):
+    __tablename__ = "delivery_agents"
+    user_id = Column(String, ForeignKey("user_accounts.user_id"), primary_key=True)
+    agent_id = Column(String, unique=True, nullable=False)
+    vehicle_type = Column(String)
+    current_location = Column(String)
+    is_available = Column(Boolean, default=True)
+    user = relationship("UserAccount", back_populates="delivery_agent")
+    orders = relationship("Order", back_populates="delivery_agent")
+
+class CustomerSupport(Base):
+    __tablename__ = "customer_supports"
+    user_id = Column(String, ForeignKey("user_accounts.user_id"), primary_key=True)
+    support_id = Column(String, unique=True, nullable=False)
+    availability_status = Column(String, default="AVAILABLE")
+    department = Column(String)
+    user = relationship("UserAccount", back_populates="customer_support")
+    assigned_tickets = relationship("SupportTicket", back_populates="support_agent")
+
+class OrderStatus(str, enum.Enum):
+    pending = "PENDING"
+    confirmed = "CONFIRMED"
+    accepted = "ACCEPTED"
+    preparing = "PREPARING"
+    out_for_delivery = "OUT_FOR_DELIVERY"
+    delivered = "DELIVERED"
+    cancelled = "CANCELLED"
