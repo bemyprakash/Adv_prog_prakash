@@ -135,3 +135,32 @@ class Payment(Base):
     status = Column(Enum(PaymentStatus), default=PaymentStatus.pending)
     transaction_ref = Column(String)
     order = relationship("Order", back_populates="payment")
+
+class TicketStatus(str, enum.Enum):
+    open = "OPEN"
+    in_progress = "IN_PROGRESS"
+    resolved = "RESOLVED"
+    escalated = "ESCALATED"
+
+class IssueType(str, enum.Enum):
+    payment = "PAYMENT"
+    order = "ORDER"
+    profile = "PROFILE"
+    other = "OTHER"
+
+class SupportTicket(Base):
+    __tablename__ = "support_tickets"
+    ticket_id = Column(String, primary_key=True, index=True)
+    customer_id = Column(String, ForeignKey("customers.user_id"))
+    order_id = Column(String, ForeignKey("orders.order_id"), nullable=True)
+    support_id = Column(String, ForeignKey("customer_supports.support_id"), nullable=True)
+    issue_type = Column(Enum(IssueType))
+    description = Column(String)
+    status = Column(Enum(TicketStatus), default=TicketStatus.open)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    customer = relationship("Customer", back_populates="tickets")
+    support_agent = relationship("CustomerSupport", back_populates="assigned_tickets")
+
+    def resolve_ticket(self):
+        """OOP state transition method"""
+        self.status = TicketStatus.resolved
