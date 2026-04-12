@@ -164,3 +164,26 @@ class SupportTicket(Base):
     def resolve_ticket(self):
         """OOP state transition method"""
         self.status = TicketStatus.resolved
+
+class RatingTarget(str, enum.Enum):
+    restaurant = "RESTAURANT"
+    agent = "AGENT"
+
+class Rating(Base):
+    __tablename__ = "ratings"
+    rating_id = Column(String, primary_key=True, index=True)
+    order_id = Column(String, ForeignKey("orders.order_id"))
+    customer_id = Column(String, ForeignKey("customers.user_id"))
+    target_type = Column(Enum(RatingTarget), nullable=False)
+    target_id = Column(String, nullable=False)
+    stars = Column(Integer)
+    comment = Column(String)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    notification_id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("user_accounts.user_id"))
+    message = Column(String)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    is_read = Column(Boolean, default=False)
