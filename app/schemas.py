@@ -95,3 +95,53 @@ class PaymentCreate(BaseModel):
 
 class PaymentOut(PaymentBase):
     pass
+
+class SupportTicketBase(BaseModel):
+    ticket_id: str
+    customer_id: str
+    order_id: Optional[str]
+    support_id: Optional[str]
+    issue_type: str
+    description: str
+    status: str
+    created_at: str
+
+class SupportTicketCreate(BaseModel):
+    customer_id: str
+    order_id: Optional[str]
+    issue_type: str
+    description: str
+
+class SupportTicketOut(SupportTicketBase):
+    pass
+
+class RatingBase(BaseModel):
+    rating_id: str
+    order_id: str
+    customer_id: str
+    stars: int
+    comment: Optional[str]
+    created_at: str
+
+class RatingCreate(BaseModel):
+    order_id: str
+    customer_id: str
+    stars: int
+    comment: Optional[str]
+
+class RatingOut(RatingBase):
+    pass
+
+class NotificationBase(BaseModel):
+    notification_id: str
+    user_id: str
+    message: str
+    created_at: str
+    is_read: bool
+
+class NotificationCreate(BaseModel):
+    user_id: str
+    message: str
+
+class NotificationOut(NotificationBase):
+    pass
