@@ -29,3 +29,69 @@ class UserAccountCreate(BaseModel):
 class UserAccountOut(UserAccountBase):
     pass
 
+class CustomerCreate(BaseModel):
+    name: str
+    phone: str
+    email: EmailStr
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    user_id: Optional[str] = None
+    role: Optional[RoleEnum] = None
+
+class MenuItemBase(BaseModel):
+    item_id: str
+    name: str
+    description: Optional[str]
+    price: float
+    category: Optional[str]
+    is_available: bool
+    restaurant_id: str
+
+class MenuItemCreate(BaseModel):
+    name: str
+    description: Optional[str]
+    price: float
+    category: Optional[str]
+    is_available: bool = True
+    restaurant_id: str
+
+class MenuItemOut(MenuItemBase):
+    pass
+
+class OrderBase(BaseModel):
+    order_id: str
+    customer_id: str
+    restaurant_id: str
+    agent_id: Optional[str]
+    status: str
+    total_amount: float
+    placed_at: str
+
+class OrderCreate(BaseModel):
+    customer_id: str
+    restaurant_id: str
+    items: List[dict] # [{item_id, quantity}]
+
+class OrderOut(OrderBase):
+    pass
+
+class PaymentBase(BaseModel):
+    payment_id: str
+    order_id: str
+    amount: float
+    method: str
+    status: str
+    transaction_ref: Optional[str]
+
+class PaymentCreate(BaseModel):
+    order_id: str
+    amount: float
+    method: str
+
+class PaymentOut(PaymentBase):
+    pass
