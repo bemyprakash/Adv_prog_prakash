@@ -1,0 +1,176 @@
+@startuml FoodizzSystemDesign
+skinparam componentStyle uml2
+
+package "Identity Management" {
+    class UserAccount {
+        + String user_id
+        + String name
+        + String phone
+        + String email
+        + String password
+        + RoleEnum role
+    }
+
+    class Customer {
+        + wallet_balance
+        + loyalty_points
+    }
+
+    class RestaurantOwner {
+        + restaurant_id
+        + restaurant_name
+        + opening_hours
+        + is_verified
+    }
+
+    class DeliveryAgent {
+        + agent_id
+        + vehicle_type
+        + current_location
+        + is_available
+    }
+
+    class CustomerSupport {
+        + support_id
+        + availability_status
+        + department
+    }
+}
+
+package "Ordering System" {
+    class Order {
+        + order_id
+        + status
+        + total_amount
+        + delivery_address
+    }
+
+    class MenuItem {
+        + item_id
+        + name
+        + price
+        + category
+    }
+
+    class OrderMenuItem {
+        + quantity
+    }
+}
+
+package "Payments & Support" {
+    class Payment {
+        + payment_id
+        + amount
+        + method
+        + status
+    }
+
+    class SupportTicket {
+        + ticket_id
+        + issue_type
+        + status
+    }
+}
+
+' Relationships
+UserAccount --> Customer
+UserAccount --> RestaurantOwner
+UserAccount --> DeliveryAgent
+UserAccount --> CustomerSupport
+
+Customer --> Order
+RestaurantOwner --> Order
+DeliveryAgent --> Order
+
+Order --> OrderMenuItem
+MenuItem --> OrderMenuItem
+RestaurantOwner --> MenuItem
+
+Order --> Payment
+Customer --> SupportTicket
+CustomerSupport --> SupportTicket
+
+@enduml
+
+
+
+
+
+
+
+
+@startuml FoodizzUseCases
+left to right direction
+
+actor Customer
+actor "Restaurant Owner"
+actor "Delivery Agent"
+actor "Customer Support"
+actor Admin
+
+rectangle Foodizz {
+  Customer --> (Place Order)
+  Customer --> (Track Order)
+  Customer --> (Cancel Order)
+  Customer --> (Raise Support Ticket)
+
+  "Restaurant Owner" --> (Manage Menu)
+  "Restaurant Owner" --> (Update Order Status)
+
+  "Delivery Agent" --> (Accept/Deliver Order)
+
+  "Customer Support" --> (Resolve Ticket)
+
+  Admin --> (Verify Restaurant)
+}
+@enduml
+
+
+
+
+
+
+@startuml OrderSequence
+
+actor Customer
+participant "Order Service"
+participant Restaurant
+participant "Delivery Agent"
+database Database
+
+Customer -> "Order Service" : place_order()
+"Order Service" -> Database : create_order(PENDING)
+"Order Service" --> Customer : order_id
+
+Restaurant -> "Order Service" : accept_order()
+"Order Service" -> Database : update(CONFIRMED)
+"Order Service" -> Database : update(PREPARING)
+
+"Delivery Agent" -> "Order Service" : accept_delivery()
+"Order Service" -> Database : assign_agent()
+"Order Service" -> Database : OUT_FOR_DELIVERY
+
+"Delivery Agent" -> "Order Service" : mark_delivered()
+"Order Service" -> Database : DELIVERED
+
+"Order Service" -> Customer : notify()
+
+@enduml
+
+
+
+
+
+@startuml OrderState
+
+[*] --> PENDING
+PENDING --> CANCELLED
+PENDING --> CONFIRMED
+CONFIRMED --> PREPARING
+PREPARING --> OUT_FOR_DELIVERY
+OUT_FOR_DELIVERY --> DELIVERED
+
+CANCELLED --> [*]
+DELIVERED --> [*]
+
+@enduml
