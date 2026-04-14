@@ -1,0 +1,176 @@
+:root {
+  --primary-blue: #0052cc;
+  --primary-blue-hover: #0043a8;
+  --secondary-yellow: #ffc400;
+  --secondary-yellow-hover: #e0ac00;
+  --bg-color: #f4f5f7;
+  --card-bg: #ffffff;
+  --text-main: #172b4d;
+  --text-muted: #5e6c84;
+  --border-color: #dfe1e6;
+  --danger: #e34935;
+  --success: #36b37e;
+  --shadow: 0 4px 12px rgba(9, 30, 66, 0.1);
+  --radius: 8px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+nav.navbar {
+  background-color: var(--primary-blue);
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+nav.navbar .brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--secondary-yellow);
+  text-decoration: none;
+}
+
+nav.navbar a.nav-link {
+  color: white;
+  text-decoration: none;
+  margin-left: 1rem;
+  font-weight: 500;
+}
+
+nav.navbar a.nav-link:hover {
+  text-decoration: underline;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.card-title {
+  margin-top: 0;
+  color: var(--primary-blue);
+  border-bottom: 2px solid var(--secondary-yellow);
+  padding-bottom: 0.5rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary-blue);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-blue-hover);
+}
+
+.btn-warning {
+  background-color: var(--secondary-yellow);
+  color: var(--text-main);
+  font-weight: bold;
+}
+
+.btn-warning:hover {
+  background-color: var(--secondary-yellow-hover);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: white;
+}
+
+.btn-success {
+  background-color: var(--success);
+  color: white;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  border-color: var(--primary-blue);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+table th, table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+table th {
+  background-color: #f8f9fa;
+  color: var(--text-muted);
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 12px;
+}
+
+.badge-pending { background: #ffe380; color: #505f79; }
+.badge-confirmed { background: var(--primary-blue); color: white; }
+.badge-delivering { background: var(--secondary-yellow); color: var(--text-main); }
+.badge-delivered { background: var(--success); color: white; }
+.badge-failed { background: var(--danger); color: white; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
