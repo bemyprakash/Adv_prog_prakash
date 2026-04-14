@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Foodizz OOP Platform{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    /* Additional inline styles for quick overrides */
+    .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .status-form { display: inline-block; margin: 0; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/web/dashboard" class="brand">🍕 Foodizz OOP Platform</a>
+    <div>
+      {% if role %}
+      <span style="font-weight: bold; margin-right: 1.5rem;">Simulating: {{ role.replace('_', ' ').title() }}</span>
+      <a href="/web/logout" class="btn btn-warning" style="padding: 0.3rem 1rem">Logout</a>
+      {% else %}
+      <a href="/web/login" class="nav-link">Login</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="container">
+    {% block content %}
+    {% endblock %}
+  </div>
+</body>
+</html>
