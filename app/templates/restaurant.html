@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+
+{% block title %}Restaurant Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h2>🏬 {{ restaurant.restaurant_name }} (Partner Portal)</h2>
+  <div>
+    <span style="color:var(--text-muted); margin-right: 1rem;">ID: {{ restaurant.restaurant_id }}</span>
+    {% if not restaurant.is_verified %}
+    <span class="badge" style="background:var(--danger); color:white;">UNVERIFIED</span>
+    {% else %}
+    <span class="badge" style="background:var(--success); color:white;">VERIFIED</span>
+    {% endif %}
+  </div>
+</div>
+
+{% if not restaurant.is_verified %}
+<div style="background:#ffebe6; color:var(--danger); padding:1.5rem; border-radius:8px; border:1px solid #ffbdad; margin-bottom:2rem; text-align:center">
+  <b>Action Required:</b><br>Your restaurant setup is pending verification by Customer Support. You cannot add menu items or accept orders until you are verified.
+</div>
+{% endif %}
+
+<div class="card" style="margin-bottom: 2rem;">
+  <h3 class="card-title">Profile Settings</h3>
+  <form method="post" action="/web/profile/update" style="display:flex; gap: 1rem; align-items:flex-end;">
+    <div class="form-group" style="margin-bottom:0; flex:1;">
+       <label>Full Name</label>
+       <input type="text" name="name" class="form-control" value="{{ restaurant.user.name }}" required>
+    </div>
+    <div class="form-group" style="margin-bottom:0; flex:1;">
+       <label>Phone Number</label>
+       <input type="text" name="phone" class="form-control" value="{{ restaurant.user.phone }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary" style="padding:0.4rem 1rem;">Update Settings</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3 class="card-title">Live Order Stream</h3>
+  {% if orders %}
+  <table>
+    <tr><th>Order Details</th><th>Items</th><th>Current Status</th><th>Fulfillment Actions</th></tr>
+    {% for o in orders %}
+    <tr>
+      <td><b>#{{ o.order_id }}</b><br><small>Ordered by {{ o.customer.user.name }}</small></td>
+      <td>
+        {% for oi in o.items %}
+          <div style="background:#f4f5f7; padding:0.2rem 0.5rem; border-radius:4px; margin-bottom:0.2rem; font-size:0.85rem">
+            <b>{{ oi.quantity }}x</b> {{ oi.menu_item.name }}
+          </div>
+        {% endfor %}
+      </td>
+      <td>
+        <span class="badge badge-{{ o.status.lower() }}">{{ o.status }}</span>
+      </td>
+      <td>
+        {% if o.status == 'CONFIRMED' %}
+        <form method="post" action="/web/restaurant/accept" class="status-form">
+          <input type="hidden" name="order_id" value="{{ o.order_id }}">
+          <button class="btn btn-success" style="padding:0.4rem 1rem;font-size:0.9rem">Accept Order</button>
+        </form>
+        {% elif o.status == 'ACCEPTED' %}
+        <form method="post" action="/web/restaurant/prepare" class="status-form">
+          <input type="hidden" name="order_id" value="{{ o.order_id }}">
+          <select name="agent_id" class="form-control" style="margin-bottom:0.5rem; padding:0.3rem" required>
+            <option value="">-- Assign Agent --</option>
+            {% for a in agents %}
+            <option value="{{ a.agent_id }}">{{ a.user.name }} ({{ a.vehicle_type }})</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-warning" style="padding:0.4rem 1rem;font-size:0.9rem; width:100%">Mark as Ready</button>
+        </form>
+        {% else %}
+        <span style="color:var(--text-muted); font-size:0.85rem">Awaiting next stage or completed.</span>
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4" style="background:#f9f9f9; padding:1rem; border-bottom: 2px solid #ddd;">
+        <b>Special Instructions from Customer:</b> {{ o.special_instructions or "None" }}<br>
+        <div style="margin-top:0.8rem">
+           <small><b>Order Chat (Visible to Customer & Agent)</b></small>
+           <div style="margin-top:0.5rem; border:1px solid #ddd; padding:0.5rem; border-radius:4px; max-height:150px; overflow-y:auto; background:white;">
+             {% for msg in chats %}
+                {% if msg.context_id == o.order_id %}
+                   <p style="margin:0.2rem 0; font-size:0.9rem"><b>{{ msg.sender.name }}:</b> {{ msg.content }}</p>
+                {% endif %}
+             {% endfor %}
+           </div>
+           <form method="post" action="/web/chat/send" style="display:flex; margin-top:0.5rem; gap:0.5rem;">
+             <input type="hidden" name="context_type" value="ORDER">
+             <input type="hidden" name="context_id" value="{{ o.order_id }}">
+             <input type="text" name="content" placeholder="Reply to customer/agent..." style="flex:1; padding:0.4rem; border-radius:4px; border:1px solid #ccc" required>
+             <button class="btn btn-primary" style="padding:0.3rem 1rem">Send</button>
+           </form>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p style="text-align: center; color: var(--text-muted); padding: 2rem 0">No orders mapping to your restaurant right now.</p>
+  {% endif %}
+</div>
+
+{% if restaurant.is_verified %}
+<div class="card" style="margin-top: 2rem;">
+  <h3 class="card-title">Add Menu Item</h3>
+  <form method="post" action="/web/restaurant/add_menu" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+    <div class="form-group"><label>Dish Name</label><input type="text" name="name" class="form-control" required placeholder="e.g. Garlic Bread"></div>
+    <div class="form-group"><label>Price (₹)</label><input type="number" step="0.01" name="price" class="form-control" required placeholder="149"></div>
+    <div class="form-group" style="grid-column: 1 / -1;"><label>Description</label><input type="text" name="description" class="form-control" required placeholder="Short description of the dish..."></div>
+    <div class="form-group" style="grid-column: 1 / -1;"><button type="submit" class="btn btn-success" style="width: 100%;">Publish to Menu Dashboard</button></div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}
